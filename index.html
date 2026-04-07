@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EmoSense — Face Emotion AI</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06070d;
+  --card:#0f1220;
+  --card2:#161929;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --text:#eef0f8;
+  --muted:#6b7399;
+  --muted2:#9aa0c4;
+  --purple:#8b5cf6;
+  --teal:#2dd4bf;
+  --green:#4ade80;
+  --yellow:#fbbf24;
+  --orange:#fb923c;
+  --red:#f87171;
+  --blue:#60a5fa;
+  --pink:#f472b6;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;
+}
+.orb{position:fixed;pointer-events:none;border-radius:50%;filter:blur(90px);opacity:0.16;z-index:0}
+.orb1{width:520px;height:520px;background:#8b5cf6;top:-150px;left:-120px}
+.orb2{width:420px;height:420px;background:#0891b2;top:35%;right:-120px}
+.orb3{width:320px;height:320px;background:#db2777;bottom:-50px;left:25%}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:3rem}
+.nav-brand{display:flex;align-items:center;gap:10px}
+.nav-logo{
+  width:38px;height:38px;border-radius:11px;
+  background:linear-gradient(135deg,#7c3aed,#ec4899);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.nav-logo svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-name{font-size:1.1rem;font-weight:800;letter-spacing:-0.3px}
+.nav-badge{
+  font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  background:rgba(139,92,246,0.15);color:#a78bfa;
+  padding:4px 11px;border-radius:99px;border:1px solid rgba(139,92,246,0.28);
+}
+
+.hero{text-align:center;margin-bottom:2.75rem}
+.hero h1{
+  font-size:clamp(1.9rem,4.5vw,2.8rem);font-weight:900;letter-spacing:-1px;line-height:1.15;
+  background:linear-gradient(130deg,#ffffff 0%,#c4b5fd 55%,#f472b6 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{margin-top:0.7rem;color:var(--muted2);font-size:0.95rem;max-width:460px;margin-inline:auto;line-height:1.6}
+.hero-chips{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:1.1rem}
+.chip{
+  font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;
+  border:1px solid var(--border2);color:var(--muted2);background:rgba(255,255,255,0.03);
+}
+
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.25rem;align-items:start}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+
+.glass{
+  background:rgba(13,16,28,0.75);border:1px solid var(--border);border-radius:20px;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  padding:1.5rem;position:relative;overflow:hidden;
+}
+.glass-top{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+}
+.sec-label{
+  font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:1.1rem;display:flex;align-items:center;gap:7px;
+}
+.sec-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0}
+
+.api-row{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  border-radius:10px;padding:7px 12px;margin-bottom:1rem;
+}
+.api-tag{
+  font-size:10px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;
+  background:rgba(139,92,246,0.22);color:#c4b5fd;
+  padding:2px 8px;border-radius:5px;flex-shrink:0;
+}
+.api-row input{
+  flex:1;background:transparent;border:none;outline:none;
+  font-size:12px;color:var(--muted2);font-family:'SF Mono','Fira Code',monospace;
+}
+
+.drop{
+  border:1.5px dashed rgba(139,92,246,0.28);border-radius:12px;
+  padding:2rem 1.25rem;display:flex;flex-direction:column;
+  align-items:center;gap:0.65rem;cursor:pointer;
+  transition:all 0.22s;text-align:center;
+  background:rgba(139,92,246,0.04);position:relative;min-height:150px;
+  justify-content:center;
+}
+.drop:hover,.drop.over{border-color:rgba(139,92,246,0.75);background:rgba(139,92,246,0.09)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.up-icon{
+  width:50px;height:50px;border-radius:14px;
+  background:rgba(139,92,246,0.13);border:1px solid rgba(139,92,246,0.22);
+  display:flex;align-items:center;justify-content:center;transition:transform 0.2s;
+}
+.drop:hover .up-icon,.drop.over .up-icon{transform:translateY(-3px)}
+.up-icon svg{width:22px;height:22px;stroke:#a78bfa;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.drop-txt{font-size:0.85rem;color:var(--muted2)}.drop-txt strong{color:var(--text);font-weight:600}
+.drop-hint{font-size:12px;color:var(--muted)}
+
+/* ── Input mode tabs ── */
+.mode-tabs{display:flex;gap:6px;margin-bottom:1rem}
+.mode-tab{
+  flex:1;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;
+  border:1px solid var(--border2);background:transparent;color:var(--muted);
+  cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.mode-tab svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.mode-tab.active{background:rgba(139,92,246,0.18);border-color:rgba(139,92,246,0.5);color:#c4b5fd}
+.mode-tab:hover:not(.active){background:rgba(255,255,255,0.04);color:var(--text)}
+
+/* ── Camera panel ── */
+.cam-wrap{display:none;flex-direction:column;gap:0.75rem}
+.cam-wrap.visible{display:flex}
+.cam-video-box{
+  width:100%;border-radius:12px;overflow:hidden;background:#000;
+  position:relative;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+}
+.cam-video-box video{width:100%;height:100%;object-fit:cover;display:block;transform:scaleX(-1)}
+.cam-video-box canvas{display:none}
+.cam-idle{
+  display:flex;flex-direction:column;align-items:center;gap:0.6rem;
+  color:var(--muted);text-align:center;padding:1.5rem;
+}
+.cam-idle svg{width:36px;height:36px;stroke:var(--muted);fill:none;stroke-width:1.4;opacity:0.4}
+.cam-idle span{font-size:12px}
+.cam-overlay{
+  position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;
+}
+.cam-face-ring{
+  width:120px;height:150px;border-radius:50%;
+  border:2px solid rgba(139,92,246,0.5);
+  box-shadow:0 0 0 4px rgba(139,92,246,0.1),inset 0 0 0 2px rgba(139,92,246,0.08);
+  transition:border-color 0.3s;
+  display:none;
+}
+.cam-live .cam-face-ring{display:block}
+.cam-status{
+  position:absolute;top:10px;left:10px;display:none;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.1);border-radius:99px;
+  padding:4px 12px;font-size:11px;font-weight:700;color:#4ade80;
+  display:flex;align-items:center;gap:5px;
+}
+.cam-status .live-dot{
+  width:6px;height:6px;border-radius:50%;background:#4ade80;
+  animation:blink 1.2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.cam-status.hidden{display:none!important}
+
+.cam-btn-row{display:flex;gap:8px}
+.btn-cam-start{
+  flex:1;padding:0.8rem;border:none;border-radius:10px;
+  font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;
+  background:linear-gradient(135deg,#0891b2 0%,#2dd4bf 100%);color:#fff;
+}
+.btn-cam-start:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(8,145,178,0.4)}
+.btn-cam-start:active{transform:scale(0.98)}
+.btn-cam-snap{
+  flex:1;padding:0.8rem;border:none;border-radius:10px;
+  font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;
+  background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);color:#fff;
+  display:none;
+}
+.btn-cam-snap:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(124,58,237,0.4)}
+.btn-cam-snap:active{transform:scale(0.98)}
+.btn-cam-stop{
+  padding:0.8rem 1rem;background:transparent;border:1px solid var(--border2);
+  border-radius:10px;font-size:0.85rem;color:var(--muted);cursor:pointer;
+  transition:all 0.18s;font-weight:500;display:none;
+}
+.btn-cam-stop:hover{background:rgba(248,113,113,0.08);border-color:rgba(248,113,113,0.4);color:#fca5a5}
+.flash{animation:flashAnim 0.25s ease-out}
+@keyframes flashAnim{0%{opacity:1}50%{opacity:0.35}100%{opacity:1}}
+
+.prev-box{
+  width:100%;border-radius:12px;overflow:hidden;background:var(--card2);
+  position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  margin-top:1rem;
+}
+.prev-box img{width:100%;height:100%;object-fit:cover;display:block}
+.prev-ph{display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:var(--muted)}
+.prev-ph svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.4;opacity:0.4}
+.prev-ph span{font-size:12px}
+.prev-pill{
+  position:absolute;bottom:10px;right:10px;display:none;
+  background:rgba(0,0,0,0.65);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.12);border-radius:99px;
+  padding:4px 13px;font-size:12px;font-weight:700;color:#fff;
+}
+
+.btn-run{
+  width:100%;margin-top:1rem;padding:0.9rem;border:none;border-radius:10px;
+  font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;
+  background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);color:#fff;
+  position:relative;overflow:hidden;letter-spacing:0.01em;
+}
+.btn-run::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);pointer-events:none}
+.btn-run:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(124,58,237,0.45)}
+.btn-run:active:not(:disabled){transform:scale(0.98);box-shadow:none}
+.btn-run:disabled{opacity:0.3;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-clr{
+  width:100%;margin-top:0.5rem;padding:0.7rem;background:transparent;
+  border:1px solid var(--border2);border-radius:10px;font-size:0.85rem;
+  color:var(--muted);cursor:pointer;transition:all 0.18s;font-weight:500;
+}
+.btn-clr:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+
+.r-empty{
+  min-height:380px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1.1rem;color:var(--muted);text-align:center;
+}
+.empty-ring{
+  width:84px;height:84px;border-radius:50%;
+  border:1.5px dashed rgba(255,255,255,0.09);
+  display:flex;align-items:center;justify-content:center;
+}
+.empty-ring svg{width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.4;opacity:0.35}
+.r-empty p{font-size:0.83rem;line-height:1.6}
+
+.r-load{
+  min-height:380px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1.25rem;
+}
+.spin{
+  width:56px;height:56px;border-radius:50%;
+  border:3px solid rgba(139,92,246,0.15);border-top:3px solid #8b5cf6;
+  animation:spin 0.75s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dots{display:flex;gap:6px}
+.dots span{
+  width:7px;height:7px;border-radius:50%;background:#8b5cf6;
+  animation:pulse 1.3s ease-in-out infinite;
+}
+.dots span:nth-child(2){animation-delay:0.2s}.dots span:nth-child(3){animation-delay:0.4s}
+@keyframes pulse{0%,80%,100%{transform:scale(0.55);opacity:0.35}40%{transform:scale(1);opacity:1}}
+.r-load p{font-size:0.83rem;color:var(--muted)}
+
+.err-box{
+  background:rgba(248,113,113,0.07);border:1px solid rgba(248,113,113,0.2);
+  border-radius:10px;padding:1rem 1.25rem;display:flex;gap:10px;
+  align-items:flex-start;font-size:0.83rem;color:#fca5a5;margin-bottom:1rem;
+}
+.err-box svg{width:18px;height:18px;stroke:#fca5a5;fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+
+.em-hero{
+  border-radius:14px;padding:1.25rem 1.35rem;margin-bottom:1.25rem;
+  display:flex;align-items:center;gap:1.25rem;position:relative;overflow:hidden;
+  background:var(--card2);border:1px solid var(--border);
+}
+.em-glow{
+  position:absolute;inset:0;opacity:0.1;pointer-events:none;
+  background:radial-gradient(circle at 0% 50%, var(--gc, #8b5cf6) 0%, transparent 65%);
+}
+.em-icon{
+  width:62px;height:62px;border-radius:50%;flex-shrink:0;font-size:32px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);
+  position:relative;z-index:1;
+}
+.em-info{position:relative;z-index:1;flex:1;min-width:0}
+.em-name{font-size:1.65rem;font-weight:900;letter-spacing:-0.5px;line-height:1}
+.em-desc{font-size:12px;color:var(--muted2);margin-top:5px}
+.em-conf{position:relative;z-index:1;text-align:right;flex-shrink:0}
+.conf-val{font-size:1.5rem;font-weight:800;line-height:1}
+.conf-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;margin-top:3px}
+
+.bars{display:flex;flex-direction:column;gap:9px}
+.brow{display:flex;align-items:center;gap:10px}
+.blbl{font-size:12px;color:var(--muted2);width:62px;flex-shrink:0}
+.btrack{flex:1;height:6px;background:rgba(255,255,255,0.05);border-radius:99px;overflow:hidden}
+.bfill{height:100%;border-radius:99px;transition:width 0.75s cubic-bezier(0.16,1,0.3,1)}
+.bpct{font-size:12px;color:var(--muted);width:40px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
+.brow.is-top .blbl{color:var(--text);font-weight:700}
+.brow.is-top .bpct{color:var(--text);font-weight:700}
+
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:1.25rem}
+.scard{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:0.8rem 0.9rem;text-align:center}
+.sval{font-size:1.05rem;font-weight:800}
+.slbl{font-size:11px;color:var(--muted);margin-top:3px}
+
+.hist-section{margin-top:1.25rem}
+.hist-lbl{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem}
+.hist-strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.hist-strip::-webkit-scrollbar{height:3px}
+.hist-strip::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+.hitem{
+  flex-shrink:0;width:56px;height:56px;border-radius:11px;overflow:hidden;
+  border:2px solid transparent;cursor:pointer;position:relative;transition:border-color 0.15s;
+}
+.hitem:hover{border-color:var(--purple)}
+.hitem img{width:100%;height:100%;object-fit:cover}
+.hdot{
+  position:absolute;bottom:3px;right:3px;font-size:11px;line-height:1;
+  background:rgba(0,0,0,0.6);border-radius:50%;width:16px;height:16px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+footer{
+  text-align:center;margin-top:3.5rem;
+  display:flex;align-items:center;justify-content:center;gap:1.25rem;flex-wrap:wrap;
+}
+.fpill{
+  background:var(--card);border:1px solid var(--border);border-radius:99px;
+  padding:5px 14px;font-size:11px;font-family:'SF Mono',monospace;color:var(--muted2);
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="wrap">
+
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      </div>
+      <span class="nav-name">EmoSense</span>
+    </div>
+    <span class="nav-badge">AI · v1.0</span>
+  </nav>
+
+  <div class="hero">
+    <h1>Read emotions<br>from any face</h1>
+    <p class="hero-sub">Upload a photo and our CNN model instantly detects the dominant emotion with confidence scores across 7 categories.</p>
+    <div class="hero-chips">
+      <span class="chip">7 emotion classes</span>
+      <span class="chip">Haar Cascade detection</span>
+      <span class="chip">TensorFlow / Keras</span>
+      <span class="chip">Real-time inference</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <div class="glass">
+      <div class="glass-top"></div>
+      <div class="sec-label"><span class="sec-dot"></span>Input</div>
+
+      <div class="api-row">
+        <span class="api-tag">API</span>
+        <input id="apiUrl" type="text" value="http://localhost:5000/predict" spellcheck="false" placeholder="http://localhost:5000/predict"/>
+      </div>
+
+      <!-- Mode tabs -->
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="tabUpload">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Image
+        </button>
+        <button class="mode-tab" id="tabCamera">
+          <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          Use Camera
+        </button>
+      </div>
+
+      <!-- Upload panel -->
+      <div id="uploadPanel">
+      <div class="drop" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*"/>
+        <div class="up-icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <p class="drop-txt"><strong>Drop image here</strong></p>
+        <p class="drop-txt">or click to browse</p>
+        <span class="drop-hint">JPG · PNG · WEBP — max 10 MB</span>
+      </div>
+
+      <div class="prev-box" id="prevBox">
+        <div class="prev-ph" id="prevPh">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Preview</span>
+        </div>
+        <img id="prevImg" src="" alt="" style="display:none"/>
+        <span class="prev-pill" id="prevPill"></span>
+      </div>
+
+      <button class="btn-run" id="runBtn" disabled>Analyze emotion</button>
+      <button class="btn-clr" id="clrBtn">Clear</button>
+      </div><!-- /uploadPanel -->
+
+      <!-- Camera panel (outside uploadPanel) -->
+      <div class="cam-wrap" id="cameraPanel">
+        <div class="cam-video-box" id="camBox">
+          <div class="cam-idle" id="camIdle">
+            <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            <span>Camera is off</span>
+          </div>
+          <video id="camVideo" autoplay playsinline style="display:none"></video>
+          <canvas id="camCanvas" style="display:none"></canvas>
+          <div class="cam-overlay">
+            <div class="cam-face-ring" id="camRing"></div>
+          </div>
+          <div class="cam-status hidden" id="camStatus">
+            <span class="live-dot"></span> LIVE
+          </div>
+        </div>
+        <div class="cam-btn-row">
+          <button class="btn-cam-start" id="btnCamStart">▶ Start Camera</button>
+          <button class="btn-cam-snap" id="btnCamSnap">📸 Capture &amp; Analyze</button>
+          <button class="btn-cam-stop" id="btnCamStop">■ Stop</button>
+        </div>
+        <div id="camSnapPreview" style="display:none">
+          <div class="prev-box" style="margin-top:0">
+            <img id="snapImg" src="" alt="" style="width:100%;height:100%;object-fit:cover"/>
+            <span class="prev-pill" id="snapPill" style="display:none"></span>
+          </div>
+          <button class="btn-clr" id="retakeBtn" style="margin-top:0.5rem">↺ Retake</button>
+        </div>
+      </div><!-- /cameraPanel -->
+    </div><!-- /left glass -->
+
+    <div class="glass" id="resultPanel">
+      <div class="glass-top"></div>
+      <div class="sec-label"><span class="sec-dot" style="background:#2dd4bf"></span>Detection result</div>
+
+      <div class="r-empty" id="stEmpty">
+        <div class="empty-ring">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 15h8"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <p>Upload a photo or use your camera,<br>then tap <strong style="color:var(--muted2)">Analyze emotion</strong> to begin</p>
+      </div>
+
+      <div class="r-load" id="stLoad" style="display:none">
+        <div class="spin"></div>
+        <div class="dots"><span></span><span></span><span></span></div>
+        <p>Scanning facial features…</p>
+      </div>
+
+      <div class="err-box" id="stErr" style="display:none">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="errTxt"></span>
+      </div>
+
+      <div id="stOk" style="display:none">
+        <div class="em-hero" id="emHero">
+          <div class="em-glow" id="emGlow"></div>
+          <div class="em-icon" id="emIcon">😐</div>
+          <div class="em-info">
+            <div class="em-name" id="emName">Neutral</div>
+            <div class="em-desc" id="emDesc">Primary emotion detected</div>
+          </div>
+          <div class="em-conf">
+            <div class="conf-val" id="confVal">—</div>
+            <div class="conf-lbl">Confidence</div>
+          </div>
+        </div>
+
+        <div class="bars" id="barsBox"></div>
+
+        <div class="stats">
+          <div class="scard"><div class="sval" id="sEmo">—</div><div class="slbl">Top emotion</div></div>
+          <div class="scard"><div class="sval" id="sConf">—</div><div class="slbl">Score</div></div>
+          <div class="scard"><div class="sval" id="sRank">—</div><div class="slbl">Rank</div></div>
+        </div>
+
+        <div class="hist-section" id="histSection" style="display:none">
+          <div class="hist-lbl">Recent predictions</div>
+          <div class="hist-strip" id="histStrip"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <span class="fpill">POST /predict</span>
+    <span class="fpill">model.h5 · 7 classes</span>
+    <span class="fpill">OpenCV · TensorFlow · Flask</span>
+  </footer>
+
+</div>
+
+<script>
+const EMOJIS={Angry:'😠',Disgust:'🤢',Fear:'😨',Happy:'😊',Sad:'😢',Surprise:'😲',Neutral:'😐'};
+const COLORS={Angry:'#f87171',Disgust:'#a78bfa',Fear:'#60a5fa',Happy:'#4ade80',Sad:'#93c5fd',Surprise:'#fbbf24',Neutral:'#94a3b8'};
+const GLOW  ={Angry:'#ef4444',Disgust:'#7c3aed',Fear:'#3b82f6',Happy:'#22c55e',Sad:'#3b82f6',Surprise:'#d97706',Neutral:'#8b5cf6'};
+const DESC  ={Angry:'High arousal, negative valence',Disgust:'Aversion response detected',Fear:'Threat-detection signal active',Happy:'Positive affect confirmed',Sad:'Low arousal, negative valence',Surprise:'Orienting response detected',Neutral:'Baseline affective state'};
+const ORDER =['Happy','Surprise','Neutral','Sad','Fear','Disgust','Angry'];
+
+const $=id=>document.getElementById(id);
+let file=null,history=[],camStream=null,camMode=false;
+
+/* ── State display ── */
+function state(s){
+  ['stEmpty','stLoad','stOk'].forEach(id=>$(id).style.display='none');
+  $('stErr').style.display='none';
+  if(s==='err') $('stErr').style.display='';
+  else $(s).style.display='';
+}
+
+/* ── Tab switching ── */
+$('tabUpload').addEventListener('click',()=>switchTab('upload'));
+$('tabCamera').addEventListener('click',()=>switchTab('camera'));
+
+function switchTab(tab){
+  camMode=(tab==='camera');
+  $('tabUpload').classList.toggle('active',!camMode);
+  $('tabCamera').classList.toggle('active',camMode);
+  $('uploadPanel').style.display=camMode?'none':'';
+  $('cameraPanel').classList.toggle('visible',camMode);
+  if(!camMode){stopCamera();}
+  state('stEmpty');
+}
+
+/* ──────────────────────────────────
+   UPLOAD MODE
+   ────────────────────────────────── */
+function loadFile(f){
+  if(!f||!f.type.startsWith('image/'))return;
+  file=f;
+  const u=URL.createObjectURL(f);
+  $('prevImg').src=u;$('prevImg').style.display='block';
+  $('prevPh').style.display='none';
+  $('runBtn').disabled=false;
+  state('stEmpty');$('prevPill').style.display='none';
+}
+
+$('fileInput').addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0])});
+const dz=$('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
+
+$('clrBtn').addEventListener('click',()=>{
+  file=null;$('fileInput').value='';
+  $('prevImg').style.display='none';$('prevPh').style.display='';
+  $('prevPill').style.display='none';
+  $('runBtn').disabled=true;state('stEmpty');
+});
+
+$('runBtn').addEventListener('click',async()=>{
+  if(!file)return;
+  $('runBtn').disabled=true;
+  await analyzeFile(file,$('prevImg').src,(pill)=>{
+    $('prevPill').textContent=pill;$('prevPill').style.display='';
+  });
+  $('runBtn').disabled=false;
+});
+
+/* ──────────────────────────────────
+   CAMERA MODE
+   ────────────────────────────────── */
+$('btnCamStart').addEventListener('click',startCamera);
+$('btnCamStop').addEventListener('click',stopCamera);
+$('retakeBtn').addEventListener('click',retake);
+$('btnCamSnap').addEventListener('click',captureAndAnalyze);
+
+async function startCamera(){
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+    const vid=$('camVideo');
+    vid.srcObject=camStream;
+    vid.style.display='block';
+    $('camIdle').style.display='none';
+    $('camBox').classList.add('cam-live');
+    $('camStatus').classList.remove('hidden');
+    $('btnCamStart').style.display='none';
+    $('btnCamSnap').style.display='';
+    $('btnCamStop').style.display='';
+    $('camSnapPreview').style.display='none';
+    state('stEmpty');
+  }catch(err){
+    $('errTxt').textContent='Camera access denied or unavailable. Please allow camera permissions.';
+    state('err');
+  }
+}
+
+function stopCamera(){
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  const vid=$('camVideo');
+  vid.srcObject=null;vid.style.display='none';
+  $('camIdle').style.display='';
+  $('camBox').classList.remove('cam-live');
+  $('camStatus').classList.add('hidden');
+  $('btnCamStart').style.display='';
+  $('btnCamSnap').style.display='none';
+  $('btnCamStop').style.display='none';
+  $('camSnapPreview').style.display='none';
+  state('stEmpty');
+}
+
+function retake(){
+  $('camSnapPreview').style.display='none';
+  $('btnCamSnap').style.display='';
+  state('stEmpty');
+  if(camStream) $('camVideo').style.display='block';
+}
+
+async function captureAndAnalyze(){
+  const vid=$('camVideo');
+  const canvas=$('camCanvas');
+  canvas.width=vid.videoWidth||640;
+  canvas.height=vid.videoHeight||480;
+  const ctx=canvas.getContext('2d');
+  // Mirror to match the CSS scaleX(-1) on video
+  ctx.save();ctx.scale(-1,1);ctx.drawImage(vid,-canvas.width,0,canvas.width,canvas.height);ctx.restore();
+
+  // Flash effect
+  $('camBox').classList.add('flash');
+  setTimeout(()=>$('camBox').classList.remove('flash'),300);
+
+  // Show snapshot preview
+  const snapUrl=canvas.toDataURL('image/jpeg',0.92);
+  $('snapImg').src=snapUrl;
+  $('camSnapPreview').style.display='';
+  $('camVideo').style.display='none';
+  $('btnCamSnap').style.display='none';
+
+  // Convert data URL to Blob/File
+  const blob=dataURLtoBlob(snapUrl);
+  const snapFile=new File([blob],'snapshot.jpg',{type:'image/jpeg'});
+
+  await analyzeFile(snapFile,snapUrl,(pill)=>{
+    $('snapPill').textContent=pill;$('snapPill').style.display='';
+  });
+}
+
+function dataURLtoBlob(dataUrl){
+  const [header,data]=dataUrl.split(',');
+  const mime=header.match(/:(.*?);/)[1];
+  const bin=atob(data);
+  const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+
+/* ──────────────────────────────────
+   SHARED ANALYSIS
+   ────────────────────────────────── */
+
+// Convert file/blob to base64
+function toBase64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result.split(',')[1]);
+    r.onerror=rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+async function analyzeFile(fileOrBlob,previewSrc,onPill){
+  state('stLoad');
+
+  // --- Try Flask backend first if URL is set ---
+  const flaskUrl=($('apiUrl').value.trim()||'').replace(/\/$/,'');
+  const useFlask=flaskUrl&&flaskUrl!=='http://localhost:5000/predict'||false;
+
+  if(useFlask){
+    const fd=new FormData();fd.append('file',fileOrBlob);
+    try{
+      const r=await fetch(flaskUrl+'/predict',{method:'POST',body:fd});
+      const d=await r.json();
+      if(!r.ok){$('errTxt').textContent=d.error||`Server error ${r.status}`;state('err');return}
+      render(d);state('stOk');
+      const pill=(EMOJIS[d.emotion]||'')+' '+d.emotion;
+      onPill(pill);addHistory(previewSrc,d.emotion);return;
+    }catch{}
+  }
+
+  // --- Claude Vision fallback ---
+  try{
+    const b64=await toBase64(fileOrBlob);
+    const mime=fileOrBlob.type||'image/jpeg';
+
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:512,
+        system:`You are a facial emotion recognition model. Analyze the face in the image and respond ONLY with valid JSON — no markdown, no extra text. The JSON must have exactly this shape:
+{
+  "emotion": "<one of: Happy|Sad|Angry|Fear|Disgust|Surprise|Neutral>",
+  "confidence": <float 0-1>,
+  "all_emotions": {
+    "Happy": <float 0-1>,
+    "Sad": <float 0-1>,
+    "Angry": <float 0-1>,
+    "Fear": <float 0-1>,
+    "Disgust": <float 0-1>,
+    "Surprise": <float 0-1>,
+    "Neutral": <float 0-1>
+  }
+}
+All seven scores must sum to approximately 1.0. If no face is detected, still return valid JSON with Neutral as dominant.`,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+            {type:'text',text:'Detect the facial emotion in this image and return JSON only.'}
+          ]
+        }]
+      })
+    });
+
+    const data=await resp.json();
+    if(!resp.ok){
+      $('errTxt').textContent='Claude API error: '+(data.error?.message||resp.status);
+      state('err');return;
+    }
+
+    const raw=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const d=JSON.parse(raw);
+    render(d);state('stOk');
+    const pill=(EMOJIS[d.emotion]||'')+' '+d.emotion;
+    onPill(pill);addHistory(previewSrc,d.emotion);
+
+  }catch(err){
+    $('errTxt').textContent='Analysis failed: '+(err.message||'Unknown error. Check console.');
+    state('err');
+  }
+}
+
+/* ──────────────────────────────────
+   RENDER RESULTS
+   ────────────────────────────────── */
+function render(d){
+  const em=d.emotion,pct=(d.confidence*100),col=COLORS[em]||'#8b5cf6';
+  $('emIcon').textContent=EMOJIS[em]||'😐';
+  $('emName').textContent=em;$('emName').style.color=col;
+  $('emGlow').style.setProperty('--gc',GLOW[em]||'#8b5cf6');
+  $('emDesc').textContent=DESC[em]||'Emotion detected';
+  $('confVal').textContent=pct.toFixed(1)+'%';$('confVal').style.color=col;
+  $('sEmo').textContent=em;$('sEmo').style.color=col;
+  $('sConf').textContent=pct.toFixed(1)+'%';
+  const all=d.all_emotions||{};
+  const sorted=Object.entries(all).sort((a,b)=>b[1]-a[1]);
+  const rank=sorted.findIndex(([k])=>k===em)+1;
+  $('sRank').textContent='#'+rank+' / '+sorted.length;
+
+  const box=$('barsBox');box.innerHTML='';
+  ORDER.filter(k=>all[k]!==undefined).sort((a,b)=>all[b]-all[a]).forEach((label,i)=>{
+    const p=(all[label]||0)*100;
+    const row=document.createElement('div');row.className='brow'+(i===0?' is-top':'');
+    row.innerHTML=`<span class="blbl">${label}</span>
+<div class="btrack"><div class="bfill" style="width:0%;background:${COLORS[label]}" data-w="${p.toFixed(2)}"></div></div>
+<span class="bpct">${p.toFixed(1)}%</span>`;
+    box.appendChild(row);
+  });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    box.querySelectorAll('.bfill').forEach(el=>el.style.width=el.dataset.w+'%');
+  }));
+}
+
+function addHistory(src,em){
+  history.unshift({src,em});if(history.length>12)history.pop();
+  $('histSection').style.display='';
+  const strip=$('histStrip');strip.innerHTML='';
+  history.forEach(item=>{
+    const el=document.createElement('div');el.className='hitem';el.title=item.em;
+    el.innerHTML=`<img src="${item.src}" alt=""/><span class="hdot">${EMOJIS[item.em]||'😐'}</span>`;
+    strip.appendChild(el);
+  });
+}
+</script>
+</body>
+</html>
