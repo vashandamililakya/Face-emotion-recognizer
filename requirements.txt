@@ -1,0 +1,22 @@
+# ============================================================
+# Face Emotion Recognizer — Python Dependencies (DeepFace)
+# ============================================================
+# Install with:
+#   pip install -r requirements.txt
+#
+# Works on Python 3.9 – 3.14 (no manual TensorFlow install needed).
+# DeepFace pulls in a compatible TF version automatically.
+# ============================================================
+
+# Web framework
+flask>=2.3.0,<4.0.0
+
+# Face analysis — handles detection + emotion in one package
+# Automatically installs compatible tensorflow, opencv, etc.
+deepface>=0.0.90
+
+# Numerical computing
+numpy>=1.23.0
+
+# Pillow prevents obscure image-format edge cases
+Pillow>=9.0.0
