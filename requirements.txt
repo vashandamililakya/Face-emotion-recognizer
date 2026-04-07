@@ -20,3 +20,5 @@ numpy>=1.23.0
 
 # Pillow prevents obscure image-format edge cases
 Pillow>=9.0.0
+tf-keras
+gunicorn
